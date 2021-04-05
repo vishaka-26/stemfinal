@@ -1,0 +1,247 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "import urllib.request\n",
+    "import PIL.Image"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<!DOCTYPE html>\n",
+      "(967,)\n"
+     ]
+    }
+   ],
+   "source": [
+    "#load file using Numpy\n",
+    "with open('/Users/priyadarshanialbuquerque/Dropbox/My Mac (Priyadarshani’s MacBook Air)/Desktop/museum_data_STEM_assignment_fixed.tsv', 'rb') as f:\n",
+    "    data = np.loadtxt(f, delimiter = \"\\t\",  dtype = 'O')\n",
+    "\n",
+    "#saving head seperatly \n",
+    "header =data[0]\n",
+    "print(header)\n",
+    "#reomving header from main array\n",
+    "data = np.delete(data,0, axis=0)\n",
+    "\n",
+    "print(data.shape)\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "#Question 2\n",
+    "max_h=0\n",
+    "max_l=0\n",
+    "max_w=0\n",
+    "low_vol=100000000\n",
+    "images=[\"NIL\",\"NIL\",\"NIL\"]\n",
+    "volume_data=[]\n",
+    "#Formatting of the dimension data\n",
+    "i=0\n",
+    "for y in range (data.shape[0]):\n",
+    "    i+=1\n",
+    "    data[y,6]= float(data[y,6].replace(\"cm\",\"\").strip())\n",
+    "    data[y,7]= float(data[y,7].replace(\"cm\",\"\").strip())\n",
+    "    data[y,8]= float(data[y,8].replace(\"cm\",\"\").strip())\n",
+    "    vol=int(data[y,6]*data[y,7]*data[y,8])\n",
+    "    \n",
+    "    if(int(vol)<6000.0):\n",
+    "        volume_data.append(vol)\n",
+    "        \n",
+    "    if(max_h<data[y,8]):\n",
+    "        max_h=data[y,8]\n",
+    "        images[2]=data[y,9] \n",
+    "    if(max_l<data[y,6]):\n",
+    "        max_l=data[y,6]\n",
+    "        images[0]=data[y,9] \n",
+    "    if(max_w<data[y,7]):\n",
+    "        max_w=data[y,7]\n",
+    "        images[1]=data[y,9] \n",
+    "        \n",
+    "    #filtering the objects having volume under 6000 cubic centimetres\n",
+    "# print(volume_data)   \n",
+    "#Display a picture for each of the longest, widest and tallest objects       \n",
+    "print('Longest')\n",
+    "urllib.request.urlretrieve(images[0], \"sample.png\")\n",
+    "img = PIL.Image.open(\"sample.png\")\n",
+    "img.show()\n",
+    "\n",
+    "print (\"widest\")\n",
+    "urllib.request.urlretrieve(images[1], \"sample.png\")\n",
+    "img = PIL.Image.open(\"sample.png\")\n",
+    "img.show()\n",
+    "\n",
+    "print (\"Tallest\")\n",
+    "urllib.request.urlretrieve(images[2], \"sample.png\")\n",
+    "img = PIL.Image.open(\"sample.png\")\n",
+    "img.show()\n",
+    "\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "# ploting Graph\n",
+    "vol=np.array(volume_data)\n",
+    "fig, ax = plt.subplots(figsize=(20,8))\n",
+    "number_of_bins = 50\n",
+    "ax.set_xlabel('Volume')\n",
+    "xticks = np.arange(0, 6000, 200)\n",
+    "ax.set_xticks(xticks)\n",
+    "ax.set_xticklabels([x for x in xticks], fontsize=12);\n",
+    "h = ax.hist(np.sort(vol), bins=number_of_bins)\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#question 3\n",
+    "# filter data having dates\n",
+    "filterarray=arr = np.empty((0,10))\n",
+    "\n",
+    "for y in range (data.shape[0]):\n",
+    "    if data[y,2]!=\"Unknown\":\n",
+    "        filterarray = np.append(filterarray, np.array([data[y]]), axis=0)\n",
+    "\n",
+    "\n",
+    "#oldest item\n",
+    "old_date=2020\n",
+    "newest_date= 1500\n",
+    "old_item=[]\n",
+    "for y in range (filterarray.shape[0]):\n",
+    "    if int(filterarray[y,2])< old_date :\n",
+    "        old_date=int(filterarray[y,2])\n",
+    "        old_item=filterarray[y]\n",
+    "    if int(filterarray[y,2])> newest_date:\n",
+    "        newest_date= int(filterarray[y,2])\n",
+    "print(\"Oldest Item is :--\")\n",
+    "print(old_item)\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Plot date of object against volume from everything added to the collection since 1850\n",
+    "latestdata= np.empty((0,11))\n",
+    "temp= np.empty((0,11))\n",
+    "i=0\n",
+    "print(data[6738])\n",
+    "print(data.shape[0])\n",
+    "for y in range (data.shape[0]):\n",
+    "    if data[y,2]!='Unknown' and int(data[y,2])> 1885  :\n",
+    "        vol= data[y,6]*data[y,7]*data[y,8]\n",
+    "        array= [data[y,0],data[y,1],data[y,2],data[y,3],data[y,4],data[y,5],data[y,6],data[y,7],data[y,8],data[y,9],vol]\n",
+    "        x=np.array(array)\n",
+    "#         print(x.shape)\n",
+    "#         temp = np.append(temp, np.array(), axis=0)\n",
+    "#         print(temp[0].shape)\n",
+    "#         print(latestdata.shape)\n",
+    "        latestdata = np.append(latestdata, np.array([x]), axis=0)\n",
+    "    print(i)\n",
+    "    i+=1\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "sortedArr = latestdata[latestdata[:,2].argsort()]\n",
+    "sortedArr1 = latestdata[latestdata[:,10].argsort()]\n",
+    "print(sortedArr1[6066,10],sortedArr1[0,10])\n",
+    "\n",
+    "translist = sortedArr[(sortedArr[:,3]=='Transport')]\n",
+    "naturelist = sortedArr[(sortedArr[:,3]=='Nature')]\n",
+    "technologylist = sortedArr[(sortedArr[:,3]=='Technology')]\n",
+    "numberlist = sortedArr[(sortedArr[:,3]=='Numbers')]\n",
+    "craftlist = sortedArr[(sortedArr[:,3]=='Craft')]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "fig,ax = plt.subplots(figsize=(10,8))\n",
+    "ax.set_xlabel('volume')\n",
+    "ax.set_ylabel('year')\n",
+    "# xticks = range(0, 99929, 2000)\n",
+    "# ax.set_xticks(xticks)\n",
+    "# yticks = range(1885,1996,5)\n",
+    "# ax.set_yticks(yticks)\n",
+    "# ax.set_yticklabels([y for y in yticks], fontsize=8);\n",
+    "# ax.set_xticklabels([x for x in xticks], fontsize=5);\n",
+    "\n",
+    "\n",
+    "ax.plot(translist[1258,10], translist[1258,2],'rx')\n",
+    "ax.plot(naturelist[:,10], naturelist[:,2],'gx')\n",
+    "ax.plot(technologylist[:,10], technologylist[:,2],'bx')\n",
+    "ax.plot(numberlist[:,10], numberlist[:,2],'yx')\n",
+    "ax.plot(craftlist[:,10], craftlist[:,2],'v')\n",
+    "\n",
+    "# ax.show()\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
